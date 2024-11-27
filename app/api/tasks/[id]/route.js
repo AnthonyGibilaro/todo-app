@@ -1,10 +1,9 @@
 import clientPromise from "../../../../lib/mongodb";
 import { ObjectId } from "mongodb";
 
-export async function PUT(request, context) {
+export async function PUT(request, { params }) {
   try {
-    const params = await context.params;
-    const id = params.id;
+    const { id } = params;
 
     if (!ObjectId.isValid(id)) {
       return Response.json({ error: "ID invalide" }, { status: 400 });
@@ -37,12 +36,21 @@ export async function PUT(request, context) {
   }
 }
 
-export async function DELETE(req, { params }) {
+export async function DELETE(req, context) {
+  const { params } = context;
+
+  if (!params || !params.id) {
+    console.error("ID manquant ou params indéfini :", params);
+    return new Response(JSON.stringify({ error: "ID manquant" }), {
+      status: 400,
+    });
+  }
+
   const { id } = params;
 
-  console.log("ID brut reçu :", id);
-
   try {
+    console.log("ID brut reçu :", id);
+
     if (!ObjectId.isValid(id)) {
       console.error("ID invalide :", id);
       return new Response(JSON.stringify({ error: "ID invalide" }), {
@@ -58,13 +66,13 @@ export async function DELETE(req, { params }) {
       .deleteOne({ _id: new ObjectId(id) });
 
     if (result.deletedCount === 0) {
-      console.error("Aucune tâche trouvée avec cet ID :", id);
+      console.error("Aucune tâche trouvée avec cet ID");
       return new Response(JSON.stringify({ error: "Tâche non trouvée" }), {
         status: 404,
       });
     }
 
-    console.log("Tâche supprimée :", id);
+    console.log("Tâche supprimée avec succès");
     return new Response(
       JSON.stringify({ message: "Tâche supprimée avec succès" }),
       { status: 200 }
