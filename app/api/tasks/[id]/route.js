@@ -38,10 +38,11 @@ export async function PUT(request, context) {
 }
 
 export async function DELETE(req, { params }) {
-  const { id } = params; // Extraction correcte de l'id
+  const { id } = params;
+
+  console.log("ID brut reçu :", id);
 
   try {
-    // Vérifiez si l'ID est valide
     if (!ObjectId.isValid(id)) {
       console.error("ID invalide :", id);
       return new Response(JSON.stringify({ error: "ID invalide" }), {
@@ -52,7 +53,6 @@ export async function DELETE(req, { params }) {
     const client = await clientPromise;
     const db = client.db("todoapp");
 
-    // Suppression de la tâche
     const result = await db
       .collection("tasks")
       .deleteOne({ _id: new ObjectId(id) });
